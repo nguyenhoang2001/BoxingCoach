@@ -1,0 +1,95 @@
+/* Home page main layout */
+.container {
+  min-height: 100vh;
+  background-color: #0a0a0a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  padding: 29px 81px;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+  align-items: start;
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  align-items: flex-start;
+  max-width: 580px;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.controlsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.settingsRow {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 680px;
+}
+
+/* Mobile */
+@media (max-width: 1023px) {
+  .content {
+    grid-template-columns: 1fr;
+    gap: 48px;
+    padding: 32px 24px;
+  }
+
+  .leftColumn {
+    max-width: 100%;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .settingsRow {
+    flex-direction: column;
+  }
+}
+
+/* Large desktop 1440px+ */
+@media (min-width: 1440px) {
+  .content {
+    padding: 40px 81px;
+    gap: 100px;
+  }
+
+  .leftColumn {
+    max-width: 600px;
+  }
+
+  .statsGrid {
+    gap: 30px 21px;
+  }
+}

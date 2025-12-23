@@ -1,0 +1,149 @@
+# Docker Compose for testing gait-detection container with different BASE_PATH values
+# Usage: docker-compose -f docker-compose.test.yml up <service-name>
+
+version: '3.8'
+
+services:
+  # Test 1: ROOT PATH (BASE_PATH=/)
+  gait-test-root:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gait-test-root
+    ports:
+      - "8080:8080"
+    environment:
+      - BASE_PATH=/
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - test-root
+
+  # Test 2: GAIT PATH (BASE_PATH=/gait) - Current deployment
+  gait-test-gait:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gait-test-gait
+    ports:
+      - "8081:8080"
+    environment:
+      - BASE_PATH=/gait
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/gait/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - test-gait
+
+  # Test 3: APP PATH (BASE_PATH=/app)
+  gait-test-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gait-test-app
+    ports:
+      - "8082:8080"
+    environment:
+      - BASE_PATH=/app
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/app/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - test-app
+
+  # Test 4: NESTED PATH (BASE_PATH=/deeply/nested/path)
+  gait-test-nested:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gait-test-nested
+    ports:
+      - "8083:8080"
+    environment:
+      - BASE_PATH=/deeply/nested/path
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/deeply/nested/path/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - test-nested
+
+  # Test 5: SPECIAL CHARACTERS (BASE_PATH=/test-with-hyphens)
+  gait-test-special:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gait-test-special
+    ports:
+      - "8084:8080"
+    environment:
+      - BASE_PATH=/test-with-hyphens
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/test-with-hyphens/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - test-special
+
+  # Test 6: API SUBPATH (BASE_PATH=/api/v1/gait)
+  gait-test-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gait-test-api
+    ports:
+      - "8085:8080"
+    environment:
+      - BASE_PATH=/api/v1/gait
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/gait/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - test-api
+
+  # Test 7: UNDERSCORE PATH (BASE_PATH=/gait_detection)
+  gait-test-underscore:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gait-test-underscore
+    ports:
+      - "8086:8080"
+    environment:
+      - BASE_PATH=/gait_detection
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/gait_detection/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - test-underscore
+
+networks:
+  default:
+    driver: bridge

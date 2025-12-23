@@ -1,97 +1,158 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Pose Detection
 
-# Getting Started
+A real-time webcam-based human pose detection and motion tracking system built with React, TypeScript, and TensorFlow.js.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+🎮 **[Live Demo](https://gait.jedarden.com)** - Try it out in your browser!
 
-## Step 1: Start Metro
+## 🎯 Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- **Real-time Pose Detection**: Uses TensorFlow.js with MoveNet for accurate pose estimation
+- **Motion Tracking**: Comprehensive movement analysis including joint positions, velocity, and acceleration
+- **Gait Analysis**: Specialized algorithms for walking pattern detection and analysis
+- **Visual Feedback**: Live skeleton overlay and motion visualization
+- **Performance Optimized**: Runs at 60+ FPS on modern hardware
+- **Docker Support**: Containerized deployment with runtime path configuration
+- **PWA Ready**: Installable as a Progressive Web App
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## 🚀 Quick Start
 
-```sh
-# Using npm
-npm start
+### Prerequisites
 
-# OR using Yarn
-yarn start
+- Node.js 18+ and npm
+- Webcam access
+- Modern browser with WebGL support
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/jedarden/pose-detection.git
+cd pose-detection
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-## Step 2: Build and run your app
+Visit http://localhost:5173 to see the application.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Docker Deployment
 
-### Android
+```bash
+# Build the container
+docker build -t pose-detection .
 
-```sh
-# Using npm
-npm run android
+# Run with default settings (root path)
+docker run -p 8080:80 pose-detection
 
-# OR using Yarn
-yarn android
+# Run with custom base path
+docker run -p 8080:80 -e BASE_PATH=/pose pose-detection
 ```
 
-### iOS
+## 🏗️ Architecture
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+- **Frontend**: React 18 with TypeScript
+- **Pose Detection**: TensorFlow.js with MoveNet
+- **State Management**: React hooks and context
+- **Styling**: CSS modules with responsive design
+- **Build Tool**: Vite for fast development
+- **Testing**: Vitest for unit tests, Cypress for E2E
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+## 📦 Key Components
 
-```sh
-bundle install
+- **PoseDetector**: Core pose detection engine
+- **MotionTracker**: Movement analysis and tracking
+- **GaitAnalyzer**: Walking pattern detection
+- **VisualOverlay**: Real-time skeleton rendering
+- **MetricsDisplay**: Performance and accuracy metrics
+
+## 🔧 Configuration
+
+### Environment Variables
+
+- `BASE_PATH`: URL base path for deployment (default: `/`)
+- `VITE_API_URL`: Backend API endpoint (optional)
+
+### Runtime Configuration
+
+The application supports runtime path configuration for flexible deployment:
+
+```javascript
+// Automatically detects and configures base path
+const basePath = window.location.pathname.match(/^\/[^\/]+/)?.[0] || '/';
 ```
 
-Then, and every time you update your native dependencies, run:
+## 📊 Performance
 
-```sh
-bundle exec pod install
+- Targets 60 FPS for smooth motion tracking
+- Optimized pose detection pipeline
+- WebGL acceleration for TensorFlow.js
+- Efficient canvas rendering
+
+## 🧪 Testing
+
+```bash
+# Run unit tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run E2E tests
+npm run test:e2e
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## 🚢 Deployment
 
-```sh
-# Using npm
-npm run ios
+### Kubernetes
 
-# OR using Yarn
-yarn ios
+See `k8s-example.yaml` for a complete deployment example with:
+- Deployment with health checks
+- Service configuration
+- Ingress with path-based routing
+- TLS certificate management
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  pose-detection:
+    image: pose-detection:latest
+    ports:
+      - "8080:80"
+    environment:
+      - BASE_PATH=/pose
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## 📄 License
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+MIT License - see LICENSE file for details
 
-## Step 3: Modify your app
+## 🤝 Contributing
 
-Now that you have successfully run the app, let's make changes!
+Contributions are welcome! Please read our contributing guidelines and submit pull requests to our repository.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## 📞 Support
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+- Create an issue on GitHub
+- Check the documentation in `/docs`
+- View deployment guide in `DEPLOYMENT.md`
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## 🤖 AI-Generated Code
 
-## Congratulations! :tada:
+This project was created using AI assistance. Below are the prompts that were used to generate this codebase:
 
-You've successfully run and modified your React Native App. :partying_face:
+### First Prompt
 
-### Now what?
+> Create a new folder in research/pose-detection conduct deep research into creating a webpage that can use a computer's webcam to analyze and detect a human in the video and to overlay pose detection of the user's body. Source the data from from academic papers, github repos, blogs, and youtube transcripts (source using youtube-transcript-retrieval library). Create up to 8 agents using the available MCP servers to conduct the research. Put all file into research/pose-detection.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+### Second Prompt
 
-# Troubleshooting
+> Based on the research in research/pose-detection create a docker image in containers/pose-detection. The application should be a single docker image which exposes a single port. It will create a web experience that uses the user's webcam to detect the presence of a person and to draw an overlay showing the person's pose and orientation. Use up to 8 agents to build this application concurrently. Follow test driven development principles and keep iterating until the application is complete. If stuck conduct deep web searches to resolve the problem. All created files should go in containers/pose-detection
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+---
 
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Built with ❤️ using React, TypeScript, and TensorFlow.js

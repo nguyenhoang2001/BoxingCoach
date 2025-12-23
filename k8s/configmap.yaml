@@ -1,0 +1,211 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pose-detection-motion-tracking-config
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+data:
+  # Application configuration
+  app.config.json: |
+    {
+      "name": "pose-detection-motion-tracking-app",
+      "version": "1.0.0",
+      "environment": "production",
+      "features": {
+        "pose_detection": true,
+        "motion_tracking": true,
+        "real_time_processing": true,
+        "data_export": true,
+        "multi_user": true
+      },
+      "ai_models": {
+        "pose_detection": {
+          "primary": "movenet_lightning",
+          "fallback": "posenet",
+          "confidence_threshold": 0.5,
+          "max_poses": 1
+        },
+        "motion_tracking": {
+          "smoothing_window": 5,
+          "calibration_required": true,
+          "min_confidence": 0.6
+        }
+      },
+      "performance": {
+        "target_fps": 30,
+        "max_processing_time": 33,
+        "memory_limit": "512MB",
+        "gpu_acceleration": true
+      },
+      "security": {
+        "csp_enabled": true,
+        "cors_enabled": true,
+        "rate_limiting": true,
+        "https_only": true
+      }
+    }
+
+  # Camera configuration
+  camera.config.json: |
+    {
+      "default_resolution": {
+        "width": 1280,
+        "height": 720
+      },
+      "supported_resolutions": [
+        {"width": 640, "height": 480},
+        {"width": 1280, "height": 720},
+        {"width": 1920, "height": 1080}
+      ],
+      "frame_rate": 30,
+      "auto_focus": true,
+      "exposure_mode": "auto",
+      "white_balance": "auto"
+    }
+
+  # Performance monitoring configuration
+  monitoring.config.json: |
+    {
+      "metrics": {
+        "enabled": true,
+        "collection_interval": 5000,
+        "retention_period": 3600000
+      },
+      "alerts": {
+        "high_cpu": {
+          "threshold": 80,
+          "duration": 300
+        },
+        "high_memory": {
+          "threshold": 85,
+          "duration": 300
+        },
+        "low_fps": {
+          "threshold": 20,
+          "duration": 60
+        },
+        "high_error_rate": {
+          "threshold": 5,
+          "duration": 120
+        }
+      }
+    }
+
+  # Logging configuration
+  logging.config.json: |
+    {
+      "level": "info",
+      "format": "json",
+      "outputs": ["stdout"],
+      "fields": {
+        "service": "pose-detection-motion-tracking",
+        "version": "1.0.0",
+        "environment": "production"
+      },
+      "sampling": {
+        "initial": 100,
+        "thereafter": 100
+      }
+    }
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pose-detection-motion-tracking-secrets
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+type: Opaque
+data:
+  # Base64 encoded secrets
+  api-key: "your-base64-encoded-api-key"
+  jwt-secret: "your-base64-encoded-jwt-secret"
+  encryption-key: "your-base64-encoded-encryption-key"
+  
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pose-detection-motion-tracking-sa
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+automountServiceAccountToken: false
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pose-detection-motion-tracking-role
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pose-detection-motion-tracking-rolebinding
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+subjects:
+- kind: ServiceAccount
+  name: pose-detection-motion-tracking-sa
+  namespace: default
+roleRef:
+  kind: Role
+  name: pose-detection-motion-tracking-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pose-detection-motion-tracking-network-policy
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+spec:
+  podSelector:
+    matchLabels:
+      app: pose-detection-motion-tracking
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: nginx-ingress
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 80
+  egress:
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80

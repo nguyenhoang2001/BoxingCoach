@@ -1,0 +1,275 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pose-detection-motion-tracking-app
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+    component: frontend
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: pose-detection-motion-tracking
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: pose-detection-motion-tracking
+        component: frontend
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: pose-detection-motion-tracking
+        image: pose-detection-motion-tracking:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: TZ
+          value: "UTC"
+        - name: NGINX_WORKER_PROCESSES
+          value: "auto"
+        - name: NGINX_WORKER_CONNECTIONS
+          value: "1024"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 10
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: nginx-cache
+          mountPath: /var/cache/nginx
+        - name: nginx-run
+          mountPath: /var/run
+        - name: nginx-logs
+          mountPath: /var/log/nginx
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: nginx-cache
+        emptyDir: {}
+      - name: nginx-run
+        emptyDir: {}
+      - name: nginx-logs
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+      securityContext:
+        fsGroup: 1001
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      tolerations:
+      - key: "node.kubernetes.io/not-ready"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+      - key: "node.kubernetes.io/unreachable"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - gait-detection
+              topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pose-detection-motion-tracking-service
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+    component: frontend
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+spec:
+  selector:
+    app: pose-detection-motion-tracking
+    component: frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 80
+    protocol: TCP
+  type: LoadBalancer
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pose-detection-motion-tracking-ingress
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|webp)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header Vary "Accept-Encoding";
+      }
+      location /models/ {
+        expires 1d;
+        add_header Cache-Control "public, max-age=86400";
+        add_header Access-Control-Allow-Origin "*";
+        add_header Access-Control-Allow-Methods "GET, OPTIONS";
+        add_header Access-Control-Allow-Headers "Content-Type, Authorization";
+      }
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/acme-challenge-type: http01
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - pose-detection.yourdomain.com
+    secretName: pose-detection-motion-tracking-tls
+  rules:
+  - host: pose-detection.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pose-detection-motion-tracking-service
+            port:
+              number: 80
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pose-detection-motion-tracking-pdb
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: pose-detection-motion-tracking
+      component: frontend
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: pose-detection-motion-tracking-hpa
+  namespace: default
+  labels:
+    app: pose-detection-motion-tracking
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pose-detection-motion-tracking-app
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max
