@@ -1,32 +1,7 @@
-import { PoseDetectionService } from '../../services/PoseDetectionService';
-import { PoseDetectionResult } from '../../types/pose';
-
-export interface PoseMetrics {
-  detectionConfidence: number;
-  keypointCount: number;
-  visibleKeypoints: number;
-  poseStability: number;
-  trackingQuality: number;
-  movementIntensity: number;
-  poseDuration: number;
-  averageKeypointConfidence: number;
-  headAngle: number;
-}
-
-export interface PerformanceMetrics {
-  frameRate: number;
-  averageProcessingTime: number;
-  memoryUsage: number;
-  droppedFrames: number;
-  totalFrames: number;
-}
-
-export interface VideoDisplayerCallbacks {
-  onInitialized?: (initialized: boolean) => void;
-  onMetricsUpdate?: (metrics: { headAngle: number; detectionConfidence: number; trackingQuality: number }) => void;
-  onError?: (error: string) => void;
-  onPoseUpdate?: (pose: PoseDetectionResult | null) => void;
-}
+import { PoseDetectionService } from '../../../services/PoseDetectionService';
+import { KeypointName, PoseDetectionResult } from '../../../types/pose';
+import PunchStatMeasure from '../../../components/boxing-pose/PunchStatMeasure';
+import { PoseMetrics, VideoDisplayerCallbacks } from '../interfaces';
 
 export class VideoDisplayer {
   private poseDetectionService: PoseDetectionService | null = null;
@@ -35,7 +10,15 @@ export class VideoDisplayer {
   private isRunningRef: boolean = false;
   private frameCountRef: number = 0;
   private lastProcessTimeRef: number = 0;
-  private showOverlaysRef: boolean = true;
+  private showOverlaysRef: boolean = false;
+  
+  // Smoothing parameters
+  private previousPose: PoseDetectionResult | null = null;
+  private smoothingFactor: number = 0.7; // Higher = more smoothing (0-1)
+  
+  // PunchStat measurement
+  private punchStatMeasure: PunchStatMeasure;
+  private leadHand: boolean = true; // true = left, false = right
   
   private poseMetrics: PoseMetrics = {
     detectionConfidence: 0,
@@ -46,28 +29,26 @@ export class VideoDisplayer {
     movementIntensity: 0,
     poseDuration: 0,
     averageKeypointConfidence: 0,
-    headAngle: 0
   };
 
-  private performanceMetrics: PerformanceMetrics = {
-    frameRate: 0,
-    averageProcessingTime: 0,
-    memoryUsage: 0,
-    droppedFrames: 0,
-    totalFrames: 0
-  };
-
-  private currentPose: PoseDetectionResult | null = null;
   private callbacks: VideoDisplayerCallbacks;
 
   constructor(callbacks: VideoDisplayerCallbacks = {}) {
     this.callbacks = callbacks;
+    this.punchStatMeasure = new PunchStatMeasure();
   }
 
-  async initializeServices(selectedCameraId?: string): Promise<void> {
+  setLeadHand(isLeft: boolean): void {
+    this.leadHand = isLeft;
+  }
+
+  setOverlaysVisible(visible: boolean): void {
+    this.showOverlaysRef = visible;
+  }
+
+  async initializeServices(): Promise<void> {
     try {
       console.log('Starting service initialization...');
-      
       // Initialize pose detection service only if not already initialized
       if (!this.poseDetectionService) {
         console.log('Creating new PoseDetectionService instance...');
@@ -81,8 +62,17 @@ export class VideoDisplayer {
             enableGPU: true,
             inputResolution: { width: 640, height: 480 },
             validation: {
-              minPoseConfidence: 0.25,
-              minKeypointConfidence: 0.3
+              minPoseConfidence: 0.4,
+              minVisibleKeypoints: 0.3,
+              requiredKeypoints: [
+                KeypointName.NOSE,
+                KeypointName.LEFT_SHOULDER,
+                KeypointName.RIGHT_SHOULDER,
+                KeypointName.LEFT_HIP,
+                KeypointName.RIGHT_HIP
+              ],
+              maxKeypointDistance: 150,
+              enableAnatomicalValidation: false
             },
             smoothing: {
               smoothingFactor: 0.2,
@@ -171,57 +161,36 @@ export class VideoDisplayer {
     }
   }
 
-  calculateHeadAngle(pose: PoseDetectionResult): number {
-    // Keypoint indices for MoveNet
-    const NOSE = 0;
-    const LEFT_SHOULDER = 5;
-    const RIGHT_SHOULDER = 6;
-
-    const nose = pose.keypoints[NOSE];
-    const leftShoulder = pose.keypoints[LEFT_SHOULDER];
-    const rightShoulder = pose.keypoints[RIGHT_SHOULDER];
-
-    // Check if all required keypoints are detected with sufficient confidence
-    if (!nose || !leftShoulder || !rightShoulder ||
-        (nose.score ?? 0) < 0.3 || 
-        (leftShoulder.score ?? 0) < 0.3 || 
-        (rightShoulder.score ?? 0) < 0.3) {
-      return 0;
+  private smoothPose(currentPose: PoseDetectionResult): PoseDetectionResult {
+    // If no previous pose, just return current
+    if (!this.previousPose) {
+      this.previousPose = JSON.parse(JSON.stringify(currentPose));
+      return currentPose;
     }
 
-    // Calculate shoulder line vector
-    const shoulderDx = rightShoulder.x - leftShoulder.x;
-    const shoulderDy = rightShoulder.y - leftShoulder.y;
+    // Apply exponential moving average to smooth keypoints
+    const smoothedPose: PoseDetectionResult = {
+      ...currentPose,
+      keypoints: currentPose.keypoints.map((kp, idx) => {
+        const prevKp = this.previousPose!.keypoints[idx];
+        
+        // Only smooth if both current and previous keypoint are confident
+        if ((kp.score ?? 0) > 0.3 && (prevKp?.score ?? 0) > 0.3) {
+          return {
+            ...kp,
+            x: prevKp.x * this.smoothingFactor + kp.x * (1 - this.smoothingFactor),
+            y: prevKp.y * this.smoothingFactor + kp.y * (1 - this.smoothingFactor),
+          };
+        }
+        
+        return kp;
+      })
+    };
 
-    // Calculate perpendicular vector to shoulder line (rotate 90 degrees)
-    const perpDx = -shoulderDy;
-    const perpDy = shoulderDx;
-
-    // Normalize the perpendicular vector
-    const perpLength = Math.sqrt(perpDx * perpDx + perpDy * perpDy);
-    const perpUnitX = perpDx / perpLength;
-    const perpUnitY = perpDy / perpLength;
-
-    // Vector from midpoint of shoulders to nose
-    const shoulderMidX = (leftShoulder.x + rightShoulder.x) / 2;
-    const shoulderMidY = (leftShoulder.y + rightShoulder.y) / 2;
-    const noseVectorX = nose.x - shoulderMidX;
-    const noseVectorY = nose.y - shoulderMidY;
-
-    // Normalize nose vector
-    const noseLength = Math.sqrt(noseVectorX * noseVectorX + noseVectorY * noseVectorY);
-    if (noseLength === 0) return 0;
+    // Update previous pose for next frame
+    this.previousPose = JSON.parse(JSON.stringify(smoothedPose));
     
-    const noseUnitX = noseVectorX / noseLength;
-    const noseUnitY = noseVectorY / noseLength;
-
-    // Calculate angle between nose vector and perpendicular to shoulder line
-    // Using dot product: cos(θ) = (a · b) / (|a| * |b|)
-    const dotProduct = noseUnitX * perpUnitX + noseUnitY * perpUnitY;
-    const angleRad = Math.acos(Math.max(-1, Math.min(1, dotProduct)));
-    const angleDeg = (angleRad * 180) / Math.PI;
-
-    return Math.round(angleDeg);
+    return smoothedPose;
   }
 
   async processFrame(videoElement: HTMLVideoElement, canvasElement: HTMLCanvasElement): Promise<void> {
@@ -269,10 +238,10 @@ export class VideoDisplayer {
       const poses = await this.poseDetectionService.detectPoses(videoElement);
       
       if (poses.length > 0) {
-        const pose = poses[0];
+        // Apply smoothing to reduce jitter
+        const rawPose = poses[0];
+        const pose = this.smoothPose(rawPose);
         const timestamp = Date.now();
-        
-        this.currentPose = pose;
         
         // Calculate metrics
         const totalKeypoints = pose.keypoints.length;
@@ -289,8 +258,20 @@ export class VideoDisplayer {
         // Calculate movement intensity (mock for now - would need pose history)
         const movementIntensity = Math.random() * 0.5 + 0.2; // Mock movement detection
         
-        // Calculate head angle
-        const headAngle = this.calculateHeadAngle(pose);
+        // Convert pose keypoints to landmarks format for PunchStatMeasure
+        const landmarks = pose.keypoints.map(kp => ({
+          name: kp.name,
+          x: kp.x,
+          y: kp.y,
+          z: kp.z,
+          score: kp.score ?? 0
+        }));
+        
+        // Get PunchStat using PunchStatMeasure
+        const punchStat = this.punchStatMeasure.getPunchStat(landmarks, timestamp);
+        
+        // Update leadHand in punchStat
+        punchStat.leadHand = this.leadHand;
         
         this.poseMetrics = {
           detectionConfidence: pose.confidence,
@@ -301,16 +282,11 @@ export class VideoDisplayer {
           movementIntensity: movementIntensity,
           poseDuration: (timestamp - (timestamp - 1000)) / 1000, // Mock duration
           averageKeypointConfidence: averageConfidence,
-          headAngle: headAngle
         };
 
-        // Notify metrics update
+        // Notify metrics update with PunchStat
         if (this.callbacks.onMetricsUpdate) {
-          this.callbacks.onMetricsUpdate({
-            headAngle: this.poseMetrics.headAngle,
-            detectionConfidence: this.poseMetrics.detectionConfidence,
-            trackingQuality: this.poseMetrics.trackingQuality
-          });
+          this.callbacks.onMetricsUpdate(punchStat);
         }
 
         if (this.callbacks.onPoseUpdate) {
@@ -322,7 +298,6 @@ export class VideoDisplayer {
         
       } else {
         // No pose detected
-        this.currentPose = null;
         this.poseMetrics = {
           detectionConfidence: 0,
           keypointCount: 0,
@@ -332,7 +307,6 @@ export class VideoDisplayer {
           movementIntensity: 0,
           poseDuration: 0,
           averageKeypointConfidence: 0,
-          headAngle: 0
         };
 
         if (this.callbacks.onPoseUpdate) {
@@ -477,7 +451,10 @@ export class VideoDisplayer {
       this.animationFrameId = null;
     }
     
-    console.log('Stopping pose detection...');
+    // Reset smoothing state
+    this.previousPose = null;
+    
+    console.log('Stopped pose detection');
   }
 
   cleanup(): void {
@@ -498,9 +475,8 @@ export class VideoDisplayer {
     }
   }
 
-  getMetrics(): { headAngle: number; detectionConfidence: number; trackingQuality: number } {
+  getMetrics(): { detectionConfidence: number; trackingQuality: number } {
     return {
-      headAngle: this.poseMetrics.headAngle,
       detectionConfidence: this.poseMetrics.detectionConfidence,
       trackingQuality: this.poseMetrics.trackingQuality
     };

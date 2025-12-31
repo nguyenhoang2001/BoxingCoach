@@ -3,17 +3,37 @@ import Header from './Header';
 import StatContainer from './StatContainer';
 import PunchScore from './PunchScore';
 import PunchSettingButton from './PunchSettingButton';
-import VideoDisplay, { VideoDisplayRef } from './VideoDisplay';
+import VideoDisplay from './VideoDisplay';
 import StartStopButtons from './StartStopButtons';
 import TipsPanel from './TipsPanel';
 import { useWorkoutControl } from './hooks/useWorkoutControl';
+import { PunchStat } from '../../components/boxing-pose/PunchStat';
+import { PunchAnalysisService } from '../../components/boxing-pose/PunchAnalysisService';
 import styles from './home.module.css';
+import { DisplayVideoHandle } from './interfaces';
 
 export default function Home(): JSX.Element {
-  const videoDisplayRef = useRef<VideoDisplayRef>(null);
-  const [headAngle, setHeadAngle] = useState(0);
+  const videoDisplayRef = useRef<DisplayVideoHandle>(null);
+  const punchAnalysisService = useRef(new PunchAnalysisService());
 
-  const { 
+  const [punchStat, setPunchStat] = useState<PunchStat>({
+    leadHand: true,
+    velocity: 0,
+    leftShoulderAngle: 0,
+    headAngle: 90,
+    rightShoulderAngle: 0,
+    hipRotation: 0,
+    rightElbowAngle: 0,
+    leftElbowAngle: 0,
+  });
+
+  const [selectedPunch, setSelectedPunch] = useState<string>('Jab');
+  const [selectedHand, setSelectedHand] = useState<string>('Left');
+  const [punchScore, setPunchScore] = useState<number>(0);
+  const [currentTip, setCurrentTip] = useState<string>('Guard your right hand up');
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+
+  const {
     isRunning, 
     isInitialized,
     handleStart: hookHandleStart, 
@@ -23,11 +43,13 @@ export default function Home(): JSX.Element {
     onStart: async () => {
       if (videoDisplayRef.current) {
         await videoDisplayRef.current.handleStart();
+        setIsAnalyzing(true); // Enable analysis when started
       }
     },
     onStop: () => {
       if (videoDisplayRef.current) {
         videoDisplayRef.current.handleStop();
+        setIsAnalyzing(false); // Disable analysis when stopped
       }
     },
     onProcessFrame: () => {
@@ -37,13 +59,36 @@ export default function Home(): JSX.Element {
     }
   });
 
-  const handleMetricsUpdate = (metrics: { headAngle: number; detectionConfidence: number; trackingQuality: number }) => {
-    setHeadAngle(metrics.headAngle);
+  const handleMetricsUpdate = (stat: PunchStat) => {
+    setPunchStat(stat);
+
+    // Analyze jab if user selected Jab and Left hand
+    if (selectedPunch === 'Jab' && selectedHand === 'Left') {
+      const analysis = punchAnalysisService.current.analyzeJab(stat);
+      setPunchScore(analysis.score);
+      
+      // Update tip with random tip from analysis
+      if (analysis.tips.length > 0) {
+        const randomIndex = Math.floor(Math.random() * analysis.tips.length);
+        setCurrentTip(analysis.tips[randomIndex]);
+      }
+    }
+  };
+
+  const handlePunchSelect = (punch: string) => {
+    setSelectedPunch(punch);
+  };
+
+  const handleHandSelect = (hand: string) => {
+    setSelectedHand(hand);
+    if (videoDisplayRef.current && videoDisplayRef.current.setLeadHand) {
+      videoDisplayRef.current.setLeadHand(hand === 'Left');
+    }
   };
 
   return (
     <div className={styles.container}>
-      <Header />
+      <Header/>
       
       <main className={styles.content}>
         {/* Left column */}
@@ -61,7 +106,7 @@ export default function Home(): JSX.Element {
               isRunning={isRunning}
               isReady={isInitialized}
             />
-            <TipsPanel tip="Guard your right hand up" />
+            <TipsPanel tip={currentTip} />
           </div>
 
           <div className={styles.settingsRow}>
@@ -69,14 +114,14 @@ export default function Home(): JSX.Element {
               title="Jab" 
               subtitle="Select to Learn"
               options={['Jab', 'Cross']}
-              onSelect={(option) => console.log('Selected punch:', option)}
+              onSelect={handlePunchSelect}
             />
 
             <PunchSettingButton 
               title="Left" 
               subtitle="Lead Hand"
               options={['Left', 'Right']}
-              onSelect={(option) => console.log('Selected hand:', option)}
+              onSelect={handleHandSelect}
             />
           </div>
         </div>
@@ -84,17 +129,17 @@ export default function Home(): JSX.Element {
         {/* Right column */}
         <div className={styles.rightColumn}>
           <div className={styles.statsGrid}>
-            <StatContainer title="Head Angle" value={`${headAngle}°`} color="#39120d" indicatorColor="#fb3835" />
-            <StatContainer title="Velocity" value="100m/s" color="#475201" indicatorColor="#dafd05" />
-            <StatContainer title="Acceleration" value="300m/s^2" color="#475201" indicatorColor="#dafd05" />
-            <StatContainer title="Left Shoulder" value="30 degree" color="#483700" indicatorColor="#faa505" />
-            <StatContainer title="Left Elbow" value="30 degree" color="#483700" indicatorColor="#faa505" />
-            <StatContainer title="Hip Rotation" value="30 degree" color="#475201" indicatorColor="#dafd05" />
-            <StatContainer title="Right Elbow" value="30 degree" color="#483700" indicatorColor="#faa505" />
-            <StatContainer title="Right Shoulder" value="30 degree" color="#483700" indicatorColor="#faa505" />
+            <StatContainer title="Head Angle" value={`${punchStat.headAngle}°`} color="#483700" indicatorColor="#faa505" />
+            {/* <StatContainer title="Velocity" value={`${punchStat.velocity.toFixed(0)} px/s`} color="#475201" indicatorColor="#dafd05" /> */}
+            <StatContainer title="Hip Rotation" value={`${punchStat.hipRotation.toFixed(0)}°`} color="#483700" indicatorColor="#faa505" />
+            <StatContainer title="Left Shoulder" value={`${punchStat.leftShoulderAngle.toFixed(0)}°`} color="#483700" indicatorColor="#faa505" />
+            <StatContainer title="Left Elbow" value={`${punchStat.leftElbowAngle.toFixed(0)}°`} color="#483700" indicatorColor="#faa505" />
+            <StatContainer title="Right Shoulder" value={`${punchStat.rightShoulderAngle.toFixed(0)}°`} color="#483700" indicatorColor="#faa505" />
+            <StatContainer title="Right Elbow" value={`${punchStat.rightElbowAngle.toFixed(0)}°`} color="#483700" indicatorColor="#faa505" />
+            {/* <StatContainer title="Lead Hand" value={punchStat.leadHand ? 'Left' : 'Right'} color="#39120d" indicatorColor="#fb3835" /> */}
           </div>
 
-          <PunchScore score={70} />
+          <PunchScore score={punchScore}/>
         </div>
       </main>
     </div>
