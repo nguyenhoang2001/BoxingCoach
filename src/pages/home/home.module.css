@@ -1,10 +1,32 @@
 /* Home page main layout */
 .container {
   min-height: 100vh;
-  background-color: #0a0a0a;
+  background-image: url("/grunge-wall-texture.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: #fff;
   display: flex;
   flex-direction: column;
+}
+
+.container::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 10, 10, 0.6);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .content {

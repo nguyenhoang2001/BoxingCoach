@@ -8,6 +8,10 @@ type Props = {
   color?: string;
   /** small indicator circle color (top-left) */
   indicatorColor?: string;
+  /** icon emoji or image path */
+  icon?: string;
+  /** whether icon is an image path */
+  isImageIcon?: boolean;
 };
 
 export default function StatContainer({
@@ -15,6 +19,8 @@ export default function StatContainer({
   value = '70%',
   color = '#2b2b2b',
   indicatorColor = '#ffea00',
+  icon = '●',
+  isImageIcon = false,
 }: Props) {
   // allow color to be passed and applied via inline style so it's easy to change
   const tileStyle: React.CSSProperties = {
@@ -28,7 +34,13 @@ export default function StatContainer({
   return (
     <aside className={styles.stat} aria-label={String(title)}>
       <div className={styles.tile} style={tileStyle}>
-        <div className={styles.indicator} style={indicatorStyle} />
+        <div className={styles.indicator} style={indicatorStyle}>
+          {isImageIcon ? (
+            <img src={icon} alt={title} className={styles.iconImage} />
+          ) : (
+            <span className={styles.iconContent}>{icon}</span>
+          )}
+        </div>
         <div className={styles.tileContent}>
           <div className={styles.title}>{title}</div>
           <div className={styles.value}>{value}</div>

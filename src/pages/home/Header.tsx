@@ -11,17 +11,17 @@ export default function Header(): JSX.Element {
             </div>
 
             <nav className={styles.right} aria-label="Main navigation">
-                <a href="/" className={styles.navLink}>
-                    Home
+                <a href="/lessons" className={styles.navLink}>
+                    Lessons
                 </a>
 
-                <a href="/contact" className={styles.navLink}>
-                    Contact
+                <a href="/instructors" className={styles.navLink}>
+                    Instructors
                 </a>
 
-                <button className={styles.signUp} type="button">
-                    Sign Up
-                </button>
+                <a href="/profile" className={styles.navLink}>
+                    Profile
+                </a>
             </nav>
         </header>
     );

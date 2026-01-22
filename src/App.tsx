@@ -3,7 +3,7 @@ import './App.css'; // ensure the .page rule is imported here or globally
 
 export default function App() {
   return (
-    <div className="page">
+    <div>
       <Home />
     </div>
   );

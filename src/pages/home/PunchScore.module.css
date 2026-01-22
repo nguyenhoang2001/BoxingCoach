@@ -1,5 +1,5 @@
 .container {
-  background: #222222;
+  background: #1c1c1c;
   color: #ffffff;
   padding: 20px 36px;
   border-radius: 28px;
@@ -16,7 +16,7 @@
 }
 
 .track {
-  background: #e0e0e0;
+  background: #0c0c0d;
   height: 46px;
   border-radius: 999px;
   overflow: hidden;
@@ -24,7 +24,7 @@
 }
 
 .fill {
-  background: #dafd05;
+  background: #fb2f30;
   height: 100%;
   width: 0%;
   border-radius: 999px;

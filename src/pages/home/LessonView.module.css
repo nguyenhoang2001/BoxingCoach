@@ -1,0 +1,219 @@
+.container {
+  background-image: url("/grunge-wall-texture.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 64px);
+  padding: 40px 60px;
+  position: relative;
+}
+
+.container::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 10, 10, 0.6);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container > * {
+  position: relative;
+  z-index: 1;
+}
+
+.backButton {
+  align-self: flex-start;
+  background: transparent;
+  border: 2px solid #d62828;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 24px;
+  width: auto;
+}
+
+.backButton:hover {
+  background: #d62828;
+}
+
+.lessonTitle {
+  font-size: 48px;
+  font-weight: 900;
+  margin: 0 0 40px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #fff;
+  width: 100%;
+  max-width: 1000px;
+  text-align: left;
+}
+
+.videoContainer {
+  width: 100%;
+  max-width: 1000px;
+  border: 3px solid #d62828;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 auto 40px auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.video {
+  width: 100%;
+  height: auto;
+  background: #000;
+  display: block;
+}
+
+.keyPointsBox {
+  width: 100%;
+  max-width: 1000px;
+  background: rgba(20, 20, 20, 0.8);
+  border: 2px solid #d62828;
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 40px;
+  backdrop-filter: blur(10px);
+}
+
+.keyPointsTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #d62828;
+}
+
+.keyPointsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.keyPointItem {
+  font-size: 16px;
+  font-weight: 500;
+  color: #e8e8e8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+.pointIcon {
+  color: #d62828;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.startButton {
+  background: #d62828;
+  color: #fff;
+  border: none;
+  padding: 18px 60px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 1.5px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.startButton:hover {
+  background: #ff4444;
+  box-shadow: 0 8px 32px rgba(214, 40, 40, 0.4);
+}
+
+.startButton:active {
+  transform: scale(0.98);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .container {
+    padding: 32px 40px;
+  }
+
+  .lessonTitle {
+    font-size: 36px;
+    margin-bottom: 32px;
+  }
+
+  .videoContainer {
+    max-width: 100%;
+    margin-bottom: 32px;
+  }
+
+  .keyPointsBox {
+    max-width: 100%;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  .startButton {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 24px 16px;
+  }
+
+  .backButton {
+    padding: 8px 16px;
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  .lessonTitle {
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+
+  .videoContainer {
+    margin-bottom: 24px;
+    border-width: 2px;
+  }
+
+  .keyPointsBox {
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .keyPointsTitle {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .keyPointItem {
+    font-size: 14px;
+    gap: 10px;
+  }
+
+  .startButton {
+    padding: 14px 40px;
+    font-size: 16px;
+  }
+}
