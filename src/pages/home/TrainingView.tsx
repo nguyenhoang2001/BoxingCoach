@@ -211,11 +211,6 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
         {/* Right column - Stats grid */}
         <div className={styles.rightColumn}>
           <div className={styles.statsGrid}>
-            {!isInitialized && (
-              <div className={styles.statsLoadingOverlay}>
-                <div className={styles.loadingText}>Setting up metrics...</div>
-              </div>
-            )}
             <StatContainer title="Head Angle" value={`${Math.round(punchStat.headAngle)}°`} color="#1c1c1c" indicatorColor="#812f30" icon="/icons/head.png" isImageIcon={true} />
             <StatContainer title="Velocity" value={`${Math.round(punchStat.velocity)} m/s`} color="#1c1c1c" indicatorColor="#812f30" icon="/icons/velocity.png" isImageIcon={true} />
             <StatContainer title="Acceleration" value={`${Math.round(punchStat.velocity)} m/s²`} color="#1c1c1c" indicatorColor="#812f30" icon="/icons/acceleration.png" isImageIcon={true} />
