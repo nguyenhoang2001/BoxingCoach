@@ -24,7 +24,6 @@ export async function getOpenAIBoxingTips(
     // Prepare metrics summary for ChatGPT
     const metricsSummary = `
       Current ${punch} Analysis:
-      - Head Angle: ${Math.round(metrics.headAngle)}°
       - Left Shoulder: ${Math.round(metrics.leftShoulderAngle)}°
       - Right Shoulder: ${Math.round(metrics.rightShoulderAngle)}°
       - Left Elbow: ${Math.round(metrics.leftElbowAngle)}°
@@ -91,10 +90,6 @@ export function getLocalBoxingTips(
   }
 
   // Metrics-based tips
-  if (metrics.headAngle > 30) {
-    tips.push('Keep your head steady - avoid looking down');
-  }
-
   if (metrics.leftElbowAngle > 120 && punch === 'Jab') {
     tips.push('Extend your jab arm straighter');
   }

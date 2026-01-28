@@ -74,22 +74,27 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
   const handleMetricsUpdate = (stat: PunchStat) => {
     setPunchStat(stat);
 
-    // Analyze punch form based on selected punch type
+    // Always analyze punch form based on selected punch type
+    let analysis;
+    
+    // Analyze based on punch type
+    if (selectedPunch === 'Jab') {
+      analysis = punchAnalysisService.current.analyzeJab(stat);
+    } else if (selectedPunch === 'Cross') {
+      analysis = punchAnalysisService.current.analyzeCross(stat);
+    } else if (selectedPunch === 'Hook') {
+      analysis = punchAnalysisService.current.analyzeHook(stat);
+    } else if (selectedPunch === 'Uppercut') {
+      analysis = punchAnalysisService.current.analyzeUppercut(stat);
+    } else {
+      analysis = punchAnalysisService.current.analyzeJab(stat); // Use Jab analysis as fallback
+    }
+
+    // Update the punch score every frame
+    setPunchScore(analysis.score);
+
+    // Debounce OpenAI API calls - only call every 4 seconds, and only when analyzing
     if (isAnalyzing) {
-      let analysis;
-      
-      // Analyze based on punch type
-      if (selectedPunch === 'Jab') {
-        analysis = punchAnalysisService.current.analyzeJab(stat);
-      } else if (selectedPunch === 'Cross') {
-        analysis = punchAnalysisService.current.analyzeJab(stat); // Use Jab analysis as fallback
-      } else {
-        analysis = punchAnalysisService.current.analyzeJab(stat); // Use Jab analysis as fallback
-      }
-
-      setPunchScore(analysis.score);
-
-      // Debounce OpenAI API calls - only call every 4 seconds
       const now = Date.now();
       if (now - lastTipUpdate >= 4000) {
         setLastTipUpdate(now);

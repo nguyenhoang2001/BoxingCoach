@@ -93,3 +93,138 @@ export interface JabConfig {
     max: number;
   };
 }
+
+/**
+ * Default configuration values for an accurate cross punch
+ * More forgiving than jab to allow users to achieve higher scores
+ */
+export interface CrossConfig {
+  // Rear hand configuration
+  rearHand: boolean; // false = right, true = left (unusual)
+  
+  // Elbow angles - in degrees (180 = fully extended)
+  rearElbow: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  leadElbow: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Shoulder angles - in degrees
+  rearShoulder: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  leadShoulder: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Head angle - in degrees (90 = neutral/straight)
+  headAngle: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Hip rotation - in degrees (crosses use significant hip rotation)
+  hipRotation: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+}
+
+/**
+ * Default configuration values for a hook punch
+ * Hooks are curved punches with bent arms and significant shoulder/hip rotation
+ */
+export interface HookConfig {
+  // Hand configuration
+  hand: 'left' | 'right';
+  
+  // Punching elbow angle - in degrees (should be bent, not fully extended)
+  punchingElbow: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Guard elbow - in degrees
+  guardElbow: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Lead shoulder angle - in degrees (rotates significantly for hooks)
+  leadShoulder: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Rear shoulder angle - in degrees
+  rearShoulder: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Hip rotation - in degrees (hooks use significant hip rotation)
+  hipRotation: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+}
+
+/**
+ * Default configuration values for an uppercut punch
+ * Uppercuts emphasize vertical drive and hip rotation
+ */
+export interface UppercutConfig {
+  // Hand configuration
+  hand: 'left' | 'right';
+  
+  // Punching elbow angle - in degrees (should be bent for upward drive)
+  punchingElbow: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Guard elbow - in degrees
+  guardElbow: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Lead shoulder angle - in degrees (minimal rotation for uppercut)
+  leadShoulder: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Rear shoulder angle - in degrees (forward movement for power)
+  rearShoulder: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+  
+  // Hip rotation - in degrees (critical for uppercut drive)
+  hipRotation: {
+    min: number;
+    optimal: number;
+    max: number;
+  };
+}

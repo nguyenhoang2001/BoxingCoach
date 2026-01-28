@@ -25,7 +25,7 @@ const TECHNIQUE_DATA: Record<string, { videoUrl: string; keyPoints: string[] }> 
     ],
   },
   cross: {
-    videoUrl: '/tutorial-videos/cross-video.mp4',
+    videoUrl: '/tutorial-videos/cross-lesson.mp4',
     keyPoints: [
       '1. Generate power from your legs.',
       '2. Drive through your back shoulder.',
@@ -33,7 +33,7 @@ const TECHNIQUE_DATA: Record<string, { videoUrl: string; keyPoints: string[] }> 
     ],
   },
   hook: {
-    videoUrl: '/tutorial-videos/hook-video.mp4',
+    videoUrl: '/tutorial-videos/hook-lesson.mp4',
     keyPoints: [
       '1. Pivot on your feet.',
       '2. Rotate your hips explosively.',
@@ -41,7 +41,7 @@ const TECHNIQUE_DATA: Record<string, { videoUrl: string; keyPoints: string[] }> 
     ],
   },
   uppercut: {
-    videoUrl: '/tutorial-videos/uppercut-video.mp4',
+    videoUrl: '/tutorial-videos/uppercut-lesson.mp4',
     keyPoints: [
       '1. Bend your knees for leverage.',
       '2. Drive upward with your hips.',
