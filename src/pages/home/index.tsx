@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './Header';
 import HeroSection from './HeroSection';
 import FeaturedTechniques from './FeaturedTechniques';
 import LessonView from './LessonView';
 import TrainingView from './TrainingView';
+import FootworkLesson from '../lessons/Footwork';
 import styles from './home.module.css';
 
 interface Technique {
@@ -38,12 +39,28 @@ export default function Home(): JSX.Element {
     setIsAnalyzing(true); // Move to training/analysis view
   };
 
+  // Scroll to top when footwork lesson is selected
+  useEffect(() => {
+    if (selectedTechnique?.id === 'footwork') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [selectedTechnique]);
+
+  // If footwork lesson is selected, show the footwork component
+  if (selectedTechnique?.id === 'footwork') {
+    return (
+      <div className={styles.container}>
+        <FootworkLesson onBack={handleBackToLessons} />
+      </div>
+    );
+  }
+
   // If a technique is selected and analysis started, show the training view
   if (selectedTechnique && isAnalyzing) {
     return (
       <div className={styles.container}>
-        <TrainingView 
-          technique={selectedTechnique} 
+        <TrainingView
+          technique={selectedTechnique}
           onBack={handleBackToLessons}
         />
       </div>
@@ -54,8 +71,8 @@ export default function Home(): JSX.Element {
   if (selectedTechnique) {
     return (
       <div className={styles.container}>
-        <LessonView 
-          technique={selectedTechnique} 
+        <LessonView
+          technique={selectedTechnique}
           onBack={handleBackToLessons}
           onStartAnalysis={handleStartAnalysis}
         />
@@ -67,10 +84,10 @@ export default function Home(): JSX.Element {
   return (
     <div className={styles.container}>
       <Header />
-      
+
       <main className={styles.main}>
         <HeroSection onStartTraining={handleStartTraining} />
-        
+
         <div id="featured-techniques">
           <FeaturedTechniques onTechniqueSelect={handleTechniqueSelect} />
         </div>

@@ -46,5 +46,19 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "main": "jest.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nguyenhoang2001/BoxingCoach.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nguyenhoang2001/BoxingCoach/issues"
+  },
+  "homepage": "https://github.com/nguyenhoang2001/BoxingCoach#readme"
 }
