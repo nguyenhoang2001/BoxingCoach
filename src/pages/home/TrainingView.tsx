@@ -1,13 +1,11 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import StatContainer from './StatContainer';
 import PunchScore from './PunchScore';
-import PunchSettingButton from './PunchSettingButton';
 import VideoDisplay from './VideoDisplay';
-import StartStopButtons from './StartStopButtons';
-import TipsPanel from './TipsPanel';
 import { useWorkoutControl } from './hooks/useWorkoutControl';
 import { PunchStat } from '../../components/boxing-pose/PunchStat';
 import { PunchAnalysisService } from '../../components/boxing-pose/PunchAnalysisService';
+import { getOpenAIBoxingTips, getLocalBoxingTips } from '../../services/boxingCoachAI';
 import styles from './TrainingView.module.css';
 import { DisplayVideoHandle } from './interfaces';
 
@@ -40,13 +38,13 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
   });
 
   const [selectedPunch, setSelectedPunch] = useState<string>(technique.title);
-  const [selectedHand, setSelectedHand] = useState<string>('Left');
   const [punchScore, setPunchScore] = useState<number>(0);
-  const [currentTip, setCurrentTip] = useState<string>('Guard your right hand up');
+  const [currentTip, setCurrentTip] = useState<string>('Position yourself in front of the camera to begin...');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [lastTipUpdate, setLastTipUpdate] = useState<number>(0);
+  const [feedbackHistory, setFeedbackHistory] = useState<string[]>([]);
 
   const {
-    isRunning, 
     isInitialized,
     handleStart: hookHandleStart, 
     handleStop: hookHandleStop,
@@ -56,12 +54,14 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
       if (videoDisplayRef.current) {
         await videoDisplayRef.current.handleStart();
         setIsAnalyzing(true);
+        setCurrentTip('Getting ready for analysis...');
       }
     },
     onStop: () => {
       if (videoDisplayRef.current) {
         videoDisplayRef.current.handleStop();
         setIsAnalyzing(false);
+        setCurrentTip('Analysis stopped');
       }
     },
     onProcessFrame: () => {
@@ -74,27 +74,105 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
   const handleMetricsUpdate = (stat: PunchStat) => {
     setPunchStat(stat);
 
-    if (selectedPunch === 'Jab' && selectedHand === 'Left' && isAnalyzing) {
-      const analysis = punchAnalysisService.current.analyzeJab(stat);
-      setPunchScore(analysis.score);
+    // Analyze punch form based on selected punch type
+    if (isAnalyzing) {
+      let analysis;
       
-      if (analysis.tips.length > 0) {
-        const randomIndex = Math.floor(Math.random() * analysis.tips.length);
-        setCurrentTip(analysis.tips[randomIndex]);
+      // Analyze based on punch type
+      if (selectedPunch === 'Jab') {
+        analysis = punchAnalysisService.current.analyzeJab(stat);
+      } else if (selectedPunch === 'Cross') {
+        analysis = punchAnalysisService.current.analyzeJab(stat); // Use Jab analysis as fallback
+      } else {
+        analysis = punchAnalysisService.current.analyzeJab(stat); // Use Jab analysis as fallback
+      }
+
+      setPunchScore(analysis.score);
+
+      // Debounce OpenAI API calls - only call every 4 seconds
+      const now = Date.now();
+      if (now - lastTipUpdate >= 4000) {
+        setLastTipUpdate(now);
+        updateTipsWithOpenAI(stat, analysis.score, analysis.feedback);
       }
     }
   };
 
-  const handlePunchSelect = (punch: string) => {
-    setSelectedPunch(punch);
-  };
+  /**
+   * Update tips using OpenAI ChatGPT (with fallback to local tips)
+   */
+  const updateTipsWithOpenAI = async (stat: PunchStat, score: number, feedback: string[]) => {
+    try {
+      // Try to get ChatGPT tips
+      const result = await getOpenAIBoxingTips(selectedPunch, stat, score, feedbackHistory);
 
-  const handleHandSelect = (hand: string) => {
-    setSelectedHand(hand);
-    if (videoDisplayRef.current && videoDisplayRef.current.setLeadHand) {
-      videoDisplayRef.current.setLeadHand(hand === 'Left');
+      // Update tips, showing first one and storing the rest
+      if (result.tips.length > 0) {
+        setCurrentTip(result.tips[0]);
+        setFeedbackHistory(result.tips);
+      }
+    } catch (error) {
+      console.error('Error getting ChatGPT tips:', error);
+      // Fallback to local tips
+      const localTips = getLocalBoxingTips(selectedPunch, stat, score);
+      if (localTips.length > 0) {
+        setCurrentTip(localTips[0]);
+        setFeedbackHistory(localTips);
+      }
     }
   };
+
+  // Set the selected punch based on the technique prop
+  useEffect(() => {
+    setSelectedPunch(technique.title);
+  }, [technique.title]);
+
+  // Auto-start analysis when initialized
+  useEffect(() => {
+    if (isInitialized && !isAnalyzing) {
+      hookHandleStart();
+    }
+  }, [isInitialized, isAnalyzing, hookHandleStart]);
+
+  // Request initial tip when analysis starts
+  useEffect(() => {
+    if (isAnalyzing && selectedPunch) {
+      // Trigger first tip update after a short delay to allow metrics to populate
+      const timer = setTimeout(() => {
+        if (lastTipUpdate === 0) {
+          setLastTipUpdate(Date.now());
+          updateTipsWithOpenAI(punchStat, punchScore, []);
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isAnalyzing]);
+
+  // Cleanup when component unmounts (when user goes back)
+  useEffect(() => {
+    return () => {
+      // Stop analysis
+      if (isAnalyzing) {
+        hookHandleStop();
+      }
+      // Reset all states
+      setPunchStat({
+        leadHand: true,
+        velocity: 0,
+        leftShoulderAngle: 0,
+        headAngle: 90,
+        rightShoulderAngle: 0,
+        hipRotation: 0,
+        rightElbowAngle: 0,
+        leftElbowAngle: 0,
+      });
+      setPunchScore(0);
+      setCurrentTip('Position yourself in front of the camera to begin...');
+      setLastTipUpdate(0);
+      setFeedbackHistory([]);
+      setIsInitialized(false);
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -109,6 +187,12 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
         {/* Left column - Video, tips and controls */}
         <div className={styles.leftColumn}>
           <div className={styles.videoContainer}>
+            {!isInitialized && (
+              <div className={styles.loadingOverlay}>
+                <div className={styles.spinner}></div>
+                <p>Initializing Camera...</p>
+              </div>
+            )}
             <VideoDisplay 
               ref={videoDisplayRef} 
               setIsInitialized={setIsInitialized}
@@ -121,11 +205,7 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
             <p className={styles.tipsText}>{currentTip}</p>
           </div>
 
-          {/* <div className={styles.scoreSection}>
-            <h3 className={styles.scoreTitle}>PUNCH SCORE</h3>
-            <PunchScore score={punchScore}/>
-          </div> */}
-          <PunchScore score={50}/>
+          <PunchScore score={punchScore}/>
         </div>
 
         {/* Right column - Stats grid */}
