@@ -5,6 +5,7 @@ import FeaturedTechniques from './FeaturedTechniques';
 import LessonView from './LessonView';
 import TrainingView from './TrainingView';
 import FootworkLesson from '../lessons/Footwork';
+import DefenseLesson from '../lessons/Defense';
 import styles from './home.module.css';
 
 interface Technique {
@@ -41,10 +42,19 @@ export default function Home(): JSX.Element {
 
   // Scroll to top when footwork lesson is selected
   useEffect(() => {
-    if (selectedTechnique?.id === 'footwork') {
+    if (selectedTechnique?.id === 'footwork' || selectedTechnique?.id === 'defense') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [selectedTechnique]);
+
+  // If defense lesson is selected, show the defense component
+  if (selectedTechnique?.id === 'defense') {
+    return (
+      <div className={styles.container}>
+        <DefenseLesson onBack={handleBackToLessons} />
+      </div>
+    );
+  }
 
   // If footwork lesson is selected, show the footwork component
   if (selectedTechnique?.id === 'footwork') {
