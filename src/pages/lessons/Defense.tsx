@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from './Defense.module.css';
+import ShadowBoxingTimer from '../tools/ShadowBoxingTimer';
 
 interface Defense {
     onBack: () => void;
@@ -25,7 +26,9 @@ interface Drill {
     id: string;
     title: string;
     duration: string;
+    durationSeconds: number; // duration in seconds
     reps: string;
+    numRounds: number; // number of rounds
     description: string;
     visualType: 'shadow' | 'line' | 'square' | 'circle';
 }
@@ -55,6 +58,7 @@ interface Video {
 export default function DefenseLesson({ onBack }: Defense): JSX.Element {
     const [selectedTechnique, setSelectedTechnique] = useState<string | null>(null);
     const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+    const [selectedDrill, setSelectedDrill] = useState<Drill | null>(null);
 
     const fundamentals: Fundamental[] = [
         {
@@ -162,7 +166,9 @@ export default function DefenseLesson({ onBack }: Defense): JSX.Element {
             id: 'shadow-defense',
             title: 'Shadow Defense',
             duration: '2 Min',
+            durationSeconds: 120,
             reps: '5 Rounds',
+            numRounds: 5,
             description: 'Move, Step & Bounce. Practice all defensive movements without a partner. Visualize incoming punches and react accordingly.',
             visualType: 'shadow',
         },
@@ -170,7 +176,9 @@ export default function DefenseLesson({ onBack }: Defense): JSX.Element {
             id: 'line-drill',
             title: 'Line Drill',
             duration: '3 Min',
+            durationSeconds: 180,
             reps: '4 Rounds',
+            numRounds: 4,
             description: 'Stay inside the Line. Partner moves rope side to side, you slip under continuously. Builds timing and rhythm.',
             visualType: 'line',
         },
@@ -178,7 +186,9 @@ export default function DefenseLesson({ onBack }: Defense): JSX.Element {
             id: 'square-drill',
             title: 'Square Drill',
             duration: '3 Min',
+            durationSeconds: 180,
             reps: '3 Rounds',
+            numRounds: 3,
             description: 'Control each Corner. Move around the perimeter of an imaginary square, practicing pivots and angles at each corner.',
             visualType: 'square',
         },
@@ -186,7 +196,9 @@ export default function DefenseLesson({ onBack }: Defense): JSX.Element {
             id: 'pivot-drill',
             title: 'Pivot Drill',
             duration: '3 Min',
+            durationSeconds: 180,
             reps: '4 Rounds',
+            numRounds: 4,
             description: 'Practice Your Turns. Circle movement combined with defensive head movement. Creates angles for counters.',
             visualType: 'circle',
         },
@@ -304,6 +316,18 @@ export default function DefenseLesson({ onBack }: Defense): JSX.Element {
         },
     ];
 
+    // Show timer if a drill is selected
+    if (selectedDrill) {
+        return (
+            <ShadowBoxingTimer
+                drillName={selectedDrill.title}
+                roundDuration={selectedDrill.durationSeconds}
+                numRounds={selectedDrill.numRounds}
+                onBack={() => setSelectedDrill(null)}
+            />
+        );
+    }
+
     return (
         <div className={styles.container}>
             {/* Back Button */}
@@ -362,7 +386,7 @@ export default function DefenseLesson({ onBack }: Defense): JSX.Element {
                             <p className={styles.drillDescription}>{drill.description}</p>
                             <button
                                 className={styles.startButton}
-                                onClick={() => setSelectedTechnique(drill.id)}
+                                onClick={() => setSelectedDrill(drill)}
                             >
                                 Start Drill
                             </button>

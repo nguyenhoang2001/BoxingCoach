@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from './Footwork.module.css';
+import ShadowBoxingTimer from '../tools/ShadowBoxingTimer';
 
 interface Footwork {
     onBack: () => void;
@@ -7,7 +8,8 @@ interface Footwork {
 
 interface Fundamental {
     title: string;
-    icon: string;
+    icon?: string;
+    iconImage?: string;
     points: string[];
 }
 
@@ -23,26 +25,37 @@ interface Drill {
     title: string;
     image: string;
     duration: string;
+    durationSeconds: number;
+    numRounds: number;
     description: string;
 }
 
-export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
-    const [selectedDrill, setSelectedDrill] = useState<string | null>(null);
+interface Video {
+    id: string;
+    title: string;
+    description: string;
+    videoUrl: string;
+    thumbnail?: string;
+}
 
+export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
+    const [selectedDrill, setSelectedDrill] = useState<Drill | null>(null);
+    const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+    
     const fundamentals: Fundamental[] = [
         {
             title: 'Balance',
-            icon: '⚖️',
+            iconImage: '/icons/balance.png',
             points: ['Proper Stance', 'Feet Positioning', 'Stay Centered'],
         },
         {
             title: 'Distance Control',
-            icon: '📏',
+            iconImage: '/icons/ruler.png',
             points: ['Close the Gap', 'Exit Safely', 'Range Awareness'],
         },
         {
             title: 'Movement Efficiency',
-            icon: '⚡',
+            iconImage: '/icons/flash.png',
             points: ['Quick Steps', 'Smooth Transitions', 'Save Energy'],
         },
     ];
@@ -51,7 +64,7 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
         {
             id: 'forward-backward',
             title: 'Forward & Backward',
-            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Ccircle cx="100" cy="100" r="40" fill="%23e74c3c"/%3E%3Crect x="85" y="50" width="30" height="60" fill="%23e74c3c"/%3E%3Crect x="70" y="110" width="20" height="40" fill="%23e74c3c"/%3E%3Crect x="110" y="110" width="20" height="40" fill="%23e74c3c"/%3E%3C/svg%3E',
+            image: '/forward-footwork.png',
             steps: [
                 '1. Step with lead foot',
                 '2. Follow with rear foot',
@@ -61,7 +74,7 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
         {
             id: 'left-right-lateral',
             title: 'Left & Right (Lateral)',
-            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Ccircle cx="100" cy="100" r="40" fill="%23e74c3c"/%3E%3Crect x="85" y="50" width="30" height="60" fill="%23e74c3c"/%3E%3Crect x="70" y="110" width="20" height="40" fill="%23e74c3c"/%3E%3Crect x="110" y="110" width="20" height="40" fill="%23e74c3c"/%3E%3C/svg%3E',
+            image: '/lateral-footwork.png',
             steps: [
                 '1. Step left, step right',
                 '2. Stay balanced',
@@ -71,7 +84,7 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
         {
             id: 'pivot',
             title: 'Pivot',
-            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Ccircle cx="100" cy="100" r="40" fill="%23e74c3c"/%3E%3Crect x="85" y="50" width="30" height="60" fill="%23e74c3c"/%3E%3Crect x="70" y="110" width="20" height="40" fill="%23e74c3c"/%3E%3Crect x="110" y="110" width="20" height="40" fill="%23e74c3c"/%3E%3C/svg%3E',
+            image: '/pivot-footwork.png',
             steps: [
                 '1. Pivot on lead foot',
                 '2. Turn your hips',
@@ -81,7 +94,7 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
         {
             id: 'circle-movement',
             title: 'Circle Movement',
-            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Ccircle cx="100" cy="100" r="40" fill="%23e74c3c"/%3E%3Crect x="85" y="50" width="30" height="60" fill="%23e74c3c"/%3E%3Crect x="70" y="110" width="20" height="40" fill="%23e74c3c"/%3E%3Crect x="110" y="110" width="20" height="40" fill="%23e74c3c"/%3E%3C/svg%3E',
+            image: '/circle-footwork.png',
             steps: [
                 '1. Move in circular pattern',
                 '2. Stay on the balls of your feet',
@@ -96,6 +109,8 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
             title: 'Shadow Footwork',
             image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Cpath d="M50,100 Q100,50 150,100 Q100,150 50,100" fill="%23e74c3c" opacity="0.8"/%3E%3Ccircle cx="100" cy="100" r="20" fill="%23e74c3c"/%3E%3C/svg%3E',
             duration: '2 Min',
+            durationSeconds: 120,
+            numRounds: 5,
             description: 'Move, Step & Bounce',
         },
         {
@@ -103,6 +118,8 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
             title: 'Line Drill',
             image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Cline x1="100" y1="20" x2="100" y2="180" stroke="%23e74c3c" stroke-width="2"/%3E%3Ccircle cx="100" cy="100" r="15" fill="%23e74c3c"/%3E%3C/svg%3E',
             duration: '3 Min',
+            durationSeconds: 180,
+            numRounds: 4,
             description: 'Stay inside the Line',
         },
         {
@@ -110,6 +127,8 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
             title: 'Square Drill',
             image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Crect x="40" y="40" width="120" height="120" fill="none" stroke="%23e74c3c" stroke-width="2"/%3E%3Ccircle cx="100" cy="100" r="15" fill="%23e74c3c"/%3E%3C/svg%3E',
             duration: '3 Min',
+            durationSeconds: 180,
+            numRounds: 3,
             description: 'Control each Corner',
         },
         {
@@ -117,9 +136,53 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
             title: 'Pivot Drill',
             image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Ccircle cx="100" cy="100" r="60" fill="none" stroke="%23e74c3c" stroke-width="2" stroke-dasharray="5,5"/%3E%3Ccircle cx="100" cy="100" r="15" fill="%23e74c3c"/%3E%3C/svg%3E',
             duration: '3 Min',
+            durationSeconds: 180,
+            numRounds: 4,
             description: 'Pracrice Your Turns',
         },
     ];
+
+    const videos: Video[] = [
+        {
+            id: 'footwork-fundamentals',
+            title: 'Footwork Fundamentals',
+            description: 'Master the essential footwork movements that form the foundation of boxing.',
+            videoUrl: '/tutorial-videos/footwork-fundamentals.mp4',
+            thumbnail:'/fundamental-footwork-thumbnail.png',
+        },
+        {
+            id: 'advanced-footwork',
+            title: 'Advanced Footwork Patterns',
+            description: 'Learn complex footwork combinations and defensive positioning strategies.',
+            videoUrl: '/tutorial-videos/advanced-footwork.mp4',
+            thumbnail:'/advanced-footwork-thumbnail.png',
+        },
+        {
+            id: 'footwork-drills',
+            title: 'Footwork Training Drills',
+            description: 'Practice these drills to improve your speed, balance, and footwork efficiency.',
+            videoUrl: '/tutorial-videos/footwork-training-drills.mp4',
+            thumbnail:'/footwork-drills-thumbnail.png',
+        },
+        // {
+        //     id: 'footwork-conditioning',
+        //     title: 'Footwork Conditioning',
+        //     description: 'Build endurance and explosive power through intensive footwork conditioning.',
+        //     videoUrl: '/tutorial-videos/footwork-conditioning.mp4',
+        // },
+    ];
+
+    // Show timer if a drill is selected
+    if (selectedDrill) {
+        return (
+            <ShadowBoxingTimer
+                drillName={selectedDrill.title}
+                roundDuration={selectedDrill.durationSeconds}
+                numRounds={selectedDrill.numRounds}
+                onBack={() => setSelectedDrill(null)}
+            />
+        );
+    }
 
     return (
         <div className={styles.container}>
@@ -140,12 +203,18 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
             </section>
             {/* Fundamentals Section */}
             <section className={styles.fundamentalsSection}>
-                <h3 className={styles.sectionTitle}>Footwork Fundamentals</h3>
+                <h3 className={styles.sectionTitle}>FOOTWORK FUNDAMENTALS</h3>
                 <div className={styles.fundamentalsGrid}>
                     {fundamentals.map((fundamental) => (
                         <div key={fundamental.title} className={styles.fundamentalCard}>
                             <h4 className={styles.fundamentalTitle}>
-                                <span className={styles.fundamentalIcon}>{fundamental.icon}</span>
+                                <span className={styles.fundamentalIcon}>
+                                    {fundamental.iconImage ? (
+                                        <img src={fundamental.iconImage} alt={fundamental.title} className={styles.fundamentalImage} />
+                                    ) : (
+                                        fundamental.icon
+                                    )}
+                                </span>
                                 {fundamental.title}
                             </h4>
                             <ul className={styles.fundamentalPoints}>
@@ -163,7 +232,7 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
 
             {/* Basic Movements Section */}
             <section className={styles.movementsSection}>
-                <h3 className={styles.sectionTitle}>Basic Movements</h3>
+                <h3 className={styles.sectionTitle}>BASIC MOVEMENTS</h3>
                 <div className={styles.movementsGrid}>
                     {basicMovements.map((movement) => (
                         <div key={movement.id} className={styles.movementCard}>
@@ -185,7 +254,7 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
 
             {/* Drills Section */}
             <section className={styles.drillsSection}>
-                <h3 className={styles.sectionTitle}>Footwork Drills</h3>
+                <h3 className={styles.sectionTitle}>FOOTWORK DRILLS</h3>
                 <div className={styles.drillsGrid}>
                     {drills.map((drill) => (
                         <div key={drill.id} className={styles.drillCard}>
@@ -201,7 +270,7 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
                             </div>
                             <button
                                 className={styles.startButton}
-                                onClick={() => setSelectedDrill(drill.id)}
+                                onClick={() => setSelectedDrill(drill)}
                             >
                                 Start Drill
                             </button>
@@ -209,6 +278,48 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
                     ))}
                 </div>
             </section>
+
+            {/* Video Demonstrations Section */}
+            <section className={styles.videoSection}>
+                <h3 className={styles.sectionTitle}>VIDEO DEMONSTRATIONS</h3>
+                <p className={styles.sectionSubtitle}>Watch professional breakdowns of footwork techniques in action.</p>
+                <div className={styles.videoGrid}>
+                    {videos.map((video) => (
+                        <div key={video.id} className={styles.videoCard}>
+                            <div 
+                                className={styles.videoThumbnail}
+                                onClick={() => setSelectedVideo(video)}
+                                style={video.thumbnail ? { backgroundImage: `url(${video.thumbnail})` } : {}}
+                            >
+                                <div className={styles.playIcon} />
+                            </div>
+                            <div className={styles.videoInfo}>
+                                <h4 className={styles.videoTitle}>{video.title}</h4>
+                                <p className={styles.videoDescription}>{video.description}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Video Modal */}
+            {selectedVideo && (
+                <div className={styles.videoModal} onClick={() => setSelectedVideo(null)}>
+                    <div className={styles.videoModalContent} onClick={(e) => e.stopPropagation()}>
+                        <button className={styles.closeButton} onClick={() => setSelectedVideo(null)}>✕</button>
+                        <video 
+                            controls 
+                            autoPlay 
+                            className={styles.videoPlayer}
+                            src={selectedVideo.videoUrl}
+                        >
+                            Your browser does not support the video tag.
+                        </video>
+                        <h3 className={styles.videoModalTitle}>{selectedVideo.title}</h3>
+                        <p className={styles.videoModalDescription}>{selectedVideo.description}</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
