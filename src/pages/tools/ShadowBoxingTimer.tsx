@@ -26,6 +26,11 @@ export default function ShadowBoxingTimer({
 
     const audioContext = typeof window !== 'undefined' ? new (window.AudioContext || (window as any).webkitAudioContext)() : null;
 
+    // Scroll to top when component mounts
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     useEffect(() => {
         if (!isRunning || isPaused) return;
 
