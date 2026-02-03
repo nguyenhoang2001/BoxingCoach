@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from './Footwork.module.css';
+import Header from '../home/Header';
 import ShadowBoxingTimer from '../tools/ShadowBoxingTimer';
 
 interface Footwork {
@@ -185,13 +186,10 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
     }
 
     return (
-        <div className={styles.container}>
-            {/* Back Button */}
-            <button className={styles.backButton} onClick={onBack}>
-                ← Back to Lessons
-            </button>
-
-            {/* Header Section */}
+        <>
+            <Header onBack={onBack} />
+            <div className={styles.container}>
+                {/* Header Section */}
             <section className={styles.headerSection}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>BOXING</h1>
@@ -321,5 +319,6 @@ export default function FootworkLesson({ onBack }: Footwork): JSX.Element {
                 </div>
             )}
         </div>
+        </>
     );
 }

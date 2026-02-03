@@ -1,4 +1,5 @@
 import styles from './LessonView.module.css';
+import Header from './Header';
 
 interface Technique {
   id: string;
@@ -74,12 +75,9 @@ export default function LessonView({
   const techniqueData = TECHNIQUE_DATA[technique.id] || TECHNIQUE_DATA.jab;
 
   return (
-    <div className={styles.container}>
-      {/* Back Button */}
-      <button className={styles.backButton} onClick={onBack}>
-        ← Back to Lessons
-      </button>
-
+    <>
+      <Header onBack={onBack} />
+      <div className={styles.container}>
       {/* Lesson Title */}
       <h1 className={styles.lessonTitle}>LESSON: {technique.title.toUpperCase()}</h1>
 
@@ -117,5 +115,6 @@ export default function LessonView({
         START ANALYSIS
       </button>
     </div>
+    </>
   );
 }

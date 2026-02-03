@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Header from '../home/Header';
 import styles from './ShadowBoxingTimer.module.css';
 
 interface TimerProps {
@@ -120,11 +121,9 @@ export default function ShadowBoxingTimer({
     const isComplete = currentRound > numRounds && !isRunning;
 
     return (
-        <div className={styles.container}>
-            {/* Back Button */}
-            <button className={styles.backButton} onClick={onBack}>
-                ← Back to Lesson
-            </button>
+        <>
+            <Header onBack={onBack} backButtonLabel="Back to Lesson" />
+            <div className={styles.container}>
 
             <div className={styles.wrapper}>
                 <div className={styles.header}>
@@ -229,6 +228,7 @@ export default function ShadowBoxingTimer({
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     );
 }

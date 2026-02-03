@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
+import Header from './Header';
 import StatContainer from './StatContainer';
 import PunchScore from './PunchScore';
 import VideoDisplay from './VideoDisplay';
@@ -180,13 +181,12 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
   }, []);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.topRow}>
-        <button className={styles.backButton} onClick={onBack}>
-          ← Back to Lessons
-        </button>
-        <h1 className={styles.title}>LESSON ANALYSIS: {technique.title.toUpperCase()}</h1>
-      </div>
+    <>
+      <Header onBack={onBack} backButtonLabel="Back to Tutorial" />
+      <div className={styles.container}>
+        <div className={styles.topRow}>
+          <h1 className={styles.title}>LESSON ANALYSIS: {technique.title.toUpperCase()}</h1>
+        </div>
       
       <main className={styles.content}>
         {/* Left column - Video, tips and controls */}
@@ -227,6 +227,7 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
           </div>
         </div>
       </main>
-    </div>
+      </div>
+    </>
   );
 }

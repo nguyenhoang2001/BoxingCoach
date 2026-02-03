@@ -22,33 +22,6 @@
   z-index: 0;
 }
 
-.backButton {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-  color: white;
-  border: 2px solid #e74c3c;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 100;
-}
-
-.backButton:hover {
-  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-  border-color: #c0392b;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(231, 76, 60, 0.4);
-}
-
-.backButton:active {
-  transform: translateY(0);
-}
-
 /* Header Section */
 .headerSection {
   width: calc(100% - 240px);
@@ -767,13 +740,6 @@
 }
 
 @media (max-width: 768px) {
-  .backButton {
-    top: 10px;
-    left: 10px;
-    padding: 8px 16px;
-    font-size: 12px;
-  }
-
   .headerSection {
     width: calc(100% - 60px);
     margin: 80px 30px 30px 30px;

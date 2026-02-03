@@ -36,6 +36,10 @@ export default function Home(): JSX.Element {
     setIsAnalyzing(false);
   };
 
+  const handleBackToTutorial = () => {
+    setIsAnalyzing(false); // Go back to lesson view without changing selectedTechnique
+  };
+
   const handleStartAnalysis = () => {
     setIsAnalyzing(true); // Move to training/analysis view
   };
@@ -71,7 +75,7 @@ export default function Home(): JSX.Element {
       <div className={styles.container}>
         <TrainingView
           technique={selectedTechnique}
-          onBack={handleBackToLessons}
+          onBack={handleBackToTutorial}
         />
       </div>
     );

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from './Defense.module.css';
+import Header from '../home/Header';
 import ShadowBoxingTimer from '../tools/ShadowBoxingTimer';
 
 interface Defense {
@@ -329,14 +330,11 @@ export default function DefenseLesson({ onBack }: Defense): JSX.Element {
     }
 
     return (
-        <div className={styles.container}>
-            {/* Back Button */}
-            <button className={styles.backButton} onClick={onBack}>
-                ← Back to Lessons
-            </button>
-
-            {/* Header Section */}
-            <section className={styles.headerSection}>
+        <>
+            <Header onBack={onBack} />
+            <div className={styles.container}>
+                {/* Header Section */}
+                <section className={styles.headerSection}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>BOXING</h1>
                     <h2 className={styles.subtitle}>DEFENSE</h2>
@@ -477,6 +475,7 @@ export default function DefenseLesson({ onBack }: Defense): JSX.Element {
                     </div>
                 </div>
             )}
-        </div>
+            </div>
+        </>
     );
 }
