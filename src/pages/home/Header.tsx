@@ -25,10 +25,6 @@ export default function Header({ onBack, backButtonLabel = "Back to Lessons" }: 
                     Lessons
                 </a>
 
-                <a href="/instructors" className={styles.navLink}>
-                    Instructors
-                </a>
-
                 <a href="/profile" className={styles.navLink}>
                     Profile
                 </a>
