@@ -36,17 +36,17 @@
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 100;
-}
 
-.backButton:hover {
-  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-  border-color: #c0392b;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(231, 76, 60, 0.4);
-}
+  &:hover {
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+    border-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(231, 76, 60, 0.4);
+  }
 
-.backButton:active {
-  transform: translateY(0);
+  &:active {
+    transform: translateY(0);
+  }
 }
 
 .wrapper {
