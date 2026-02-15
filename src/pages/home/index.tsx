@@ -6,6 +6,8 @@ import LessonView from './LessonView';
 import TrainingView from './TrainingView';
 import FootworkLesson from '../lessons/Footwork';
 import DefenseLesson from '../lessons/Defense';
+import Auth from '../auth/Auth';
+import Profile from '../profile/Profile';
 import styles from './home.module.css';
 
 interface Technique {
@@ -17,8 +19,26 @@ interface Technique {
 }
 
 export default function Home(): JSX.Element {
+  console.log('Home component rendering...');
   const [selectedTechnique, setSelectedTechnique] = useState<Technique | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'profile'>('home');
+
+  // Handle URL-based navigation
+  useEffect(() => {
+    console.log('Home useEffect running...');
+    const path = window.location.pathname;
+    if (path === '/login') {
+      setCurrentPage('login');
+    } else if (path === '/signup') {
+      setCurrentPage('signup');
+    } else if (path === '/profile') {
+      setCurrentPage('profile');
+    } else {
+      setCurrentPage('home');
+    }
+    console.log('Current page:', path);
+  }, []);
 
   const handleStartTraining = () => {
     // Scroll to featured techniques section
@@ -50,6 +70,19 @@ export default function Home(): JSX.Element {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [selectedTechnique]);
+
+  // Show auth page if requested
+  if (currentPage === 'login' || currentPage === 'signup') {
+    return <Auth initialTab={currentPage === 'signup' ? 'signup' : 'login'} />;
+  }
+
+  // Show profile page if requested
+  if (currentPage === 'profile') {
+    return <Profile onBack={() => {
+      setCurrentPage('home');
+      window.history.pushState({}, '', '/');
+    }} />;
+  }
 
   // If defense lesson is selected, show the defense component
   if (selectedTechnique?.id === 'defense') {
