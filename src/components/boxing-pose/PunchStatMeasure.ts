@@ -63,8 +63,6 @@ export default class PunchStatMeasure {
         // We'll compare absolute x-distance between wrist and same-side shoulder.
         let chosenSide: PunchSide = 'unknown';
         let chosenWrist: Landmark | undefined;
-        let chosenElbow: Landmark | undefined;
-        let chosenShoulder: Landmark | undefined;
 
         const leftDeltaX = leftWrist && leftShoulder ? Math.abs(leftWrist.x - leftShoulder.x) : -1;
         const rightDeltaX = rightWrist && rightShoulder ? Math.abs(rightWrist.x - rightShoulder.x) : -1;
@@ -88,24 +86,16 @@ export default class PunchStatMeasure {
 
         if (chosenSide === 'left') {
             chosenWrist = leftWrist;
-            chosenElbow = leftElbow;
-            chosenShoulder = leftShoulder;
         } else if (chosenSide === 'right') {
             chosenWrist = rightWrist;
-            chosenElbow = rightElbow;
-            chosenShoulder = rightShoulder;
         } else {
             // fallback: pick whichever wrist exists
             if (leftWrist) {
                 chosenSide = 'left';
                 chosenWrist = leftWrist;
-                chosenElbow = leftElbow;
-                chosenShoulder = leftShoulder;
             } else {
                 chosenSide = 'right';
                 chosenWrist = rightWrist!;
-                chosenElbow = rightElbow;
-                chosenShoulder = rightShoulder;
             }
         }
 

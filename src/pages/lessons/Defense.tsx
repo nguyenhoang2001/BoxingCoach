@@ -14,15 +14,6 @@ interface Fundamental {
     points: string[];
 }
 
-interface Technique {
-    id: string;
-    title: string;
-    level: string;
-    duration: string;
-    description: string;
-    image: string;
-}
-
 interface Drill {
     id: string;
     title: string;
@@ -57,7 +48,6 @@ interface Video {
 }
 
 export default function DefenseLesson({ onBack }: Defense): JSX.Element {
-    const [selectedTechnique, setSelectedTechnique] = useState<string | null>(null);
     const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
     const [selectedDrill, setSelectedDrill] = useState<Drill | null>(null);
 
@@ -116,49 +106,6 @@ export default function DefenseLesson({ onBack }: Defense): JSX.Element {
                 'Perfect for hooks and overhands',
                 'Keep your chin tucked',
             ],
-        },
-    ];
-
-    const techniques: Technique[] = [
-        {
-            id: 'slip',
-            title: 'The Slip',
-            level: 'Beginner',
-            duration: '5 Min',
-            description: 'Master the fundamental slip technique to move off center and avoid incoming punches.',
-            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Ccircle cx="100" cy="60" r="25" fill="%23e74c3c"/%3E%3Crect x="80" y="85" width="40" height="50" fill="%23e74c3c"/%3E%3Crect x="65" y="135" width="20" height="35" fill="%23e74c3c"/%3E%3Crect x="115" y="135" width="20" height="35" fill="%23e74c3c"/%3E%3Cpath d="M 120 50 L 150 40" stroke="%23f39c12" stroke-width="2" stroke-dasharray="5,5"/%3E%3Ccircle cx="100" cy="50" r="30" fill="none" stroke="%23f39c12" stroke-width="1" stroke-dasharray="5,5"/%3E%3C/svg%3E',
-        },
-        {
-            id: 'bob-weave',
-            title: 'Bob & Weave',
-            level: 'Intermediate',
-            duration: '7 Min',
-            description: 'Duck under hooks and power punches while maintaining balance and counter opportunities.',
-            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Cpath d="M 100 40 Q 80 80 100 120 Q 120 80 100 40" stroke="%23e74c3c" stroke-width="3" fill="none"/%3E%3Ccircle cx="100" cy="100" r="20" fill="%23e74c3c"/%3E%3C/svg%3E',
-        },
-        {
-            id: 'parry',
-            title: 'The Parry',
-            level: 'Intermediate',
-            duration: '6 Min',
-            description: 'Deflect punches with minimal hand movements to create instant counter-punch opportunities.',
-            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Cline x1="40" y1="100" x2="140" y2="100" stroke="%23e74c3c" stroke-width="2"/%3E%3Cpath d="M 120 80 L 140 100 L 120 120" fill="%23e74c3c" stroke="%23e74c3c"/%3E%3Ccircle cx="100" cy="100" r="20" fill="%23e74c3c"/%3E%3C/svg%3E',
-        },
-        {
-            id: 'block',
-            title: 'High Guard Block',
-            level: 'Beginner',
-            duration: '5 Min',
-            description: 'Use your gloves and arms to absorb punches when evasion isn\'t possible.',
-            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Crect x="70" y="60" width="60" height="80" fill="%23e74c3c" opacity="0.7"/%3E%3Ccircle cx="100" cy="100" r="15" fill="%23e74c3c"/%3E%3Cline x1="40" y1="80" x2="70" y2="80" stroke="%23f39c12" stroke-width="2" stroke-dasharray="5,5"/%3E%3C/svg%3E',
-        },
-        {
-            id: 'roll',
-            title: 'The Roll',
-            level: 'Intermediate',
-            duration: '7 Min',
-            description: 'Rotate your shoulders to let hooks and overhands slide off your body.',
-            image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23222" width="200" height="200"/%3E%3Ccircle cx="100" cy="100" r="50" fill="none" stroke="%23e74c3c" stroke-width="2" stroke-dasharray="5,5"/%3E%3Ccircle cx="100" cy="60" r="15" fill="%23e74c3c"/%3E%3Cpath d="M 100 100 L 130 130" stroke="%23e74c3c" stroke-width="2"/%3E%3C/svg%3E',
         },
     ];
 

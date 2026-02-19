@@ -99,7 +99,7 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
       const now = Date.now();
       if (now - lastTipUpdate >= 4000) {
         setLastTipUpdate(now);
-        updateTipsWithOpenAI(stat, analysis.score, analysis.feedback);
+        updateTipsWithOpenAI(stat, analysis.score);
       }
     }
   };
@@ -107,7 +107,7 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
   /**
    * Update tips using OpenAI ChatGPT (with fallback to local tips)
    */
-  const updateTipsWithOpenAI = async (stat: PunchStat, score: number, feedback: string[]) => {
+  const updateTipsWithOpenAI = async (stat: PunchStat, score: number) => {
     try {
       // Try to get ChatGPT tips
       const result = await getOpenAIBoxingTips(selectedPunch, stat, score, feedbackHistory);
@@ -147,7 +147,7 @@ export default function TrainingView({ technique, onBack }: TrainingViewProps): 
       const timer = setTimeout(() => {
         if (lastTipUpdate === 0) {
           setLastTipUpdate(Date.now());
-          updateTipsWithOpenAI(punchStat, punchScore, []);
+          updateTipsWithOpenAI(punchStat, punchScore);
         }
       }, 1000);
       return () => clearTimeout(timer);

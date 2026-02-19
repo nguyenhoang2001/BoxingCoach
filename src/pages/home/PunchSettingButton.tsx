@@ -1,4 +1,4 @@
-import React, { useId, useState } from 'react';
+import { useId, useState } from 'react';
 import styles from './PunchSettingButton.module.css';
 
 export interface PunchSettingButtonProps {
